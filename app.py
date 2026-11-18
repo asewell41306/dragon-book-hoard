@@ -153,7 +153,7 @@ def show_shelf(shelf_name, tab):
             st.info(f"No books in '{shelf_name}' yet. Add one above!")
         else:
             for idx, row in shelf_books.iterrows():
-                col_cover, col_info = st.columns([1, 3])
+                col_cover, col_info = st.columns()
                 with col_cover:
                     if pd.notna(row.get("CoverURL")) and str(row["CoverURL"]).startswith("http"):
                         st.image(row["CoverURL"], width=110)
@@ -168,13 +168,13 @@ def show_shelf(shelf_name, tab):
                     other_shelves = [s for s in SHELVES if s != shelf_name]
                     btn_col1, btn_col2, btn_col3 = st.columns([2, 2, 1.5])
                     with btn_col1:
-                        if st.button(f"Move to {other_shelves[0]}", key=f"m1_{idx}"):
-                            df.at[idx, "Shelf"] = other_shelves[0]
+                        if st.button(f"Move to {other_shelves}", key=f"m1_{idx}"):
+                            df.at[idx, "Shelf"] = other_shelves
                             save_books(df)
                             st.rerun()
                     with btn_col2:
-                        if st.button(f"Move to {other_shelves[1]}", key=f"m2_{idx}"):
-                            df.at[idx, "Shelf"] = other_shelves[1]
+                        if st.button(f"Move to {other_shelves}", key=f"m2_{idx}"):
+                            df.at[idx, "Shelf"] = other_shelves
                             save_books(df)
                             st.rerun()
                     with btn_col3:
@@ -182,10 +182,11 @@ def show_shelf(shelf_name, tab):
                             df = df.drop(idx).reset_index(drop=True)
                             save_books(df)
                             st.rerun()
+                            with btn_col1:
                 st.divider()
 
 show_shelf("Books I Own", tab1)
-show_shelf("Want to Read", tab2)
+show_shelf("Books I Want to Read", tab2)
 show_shelf("Books I've Read", tab3)
 
 # --- Dragon's Whimsy Tab ---
