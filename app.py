@@ -153,7 +153,7 @@ def show_shelf(shelf_name, tab):
             st.info(f"No books in '{shelf_name}' yet. Add one above!")
         else:
             for idx, row in shelf_books.iterrows():
-                col_cover, col_info = st.columns()
+                col_cover, col_info = st.columns([1,3])
                 with col_cover:
                     if pd.notna(row.get("CoverURL")) and str(row["CoverURL"]).startswith("http"):
                         st.image(row["CoverURL"], width=110)
@@ -183,7 +183,6 @@ def show_shelf(shelf_name, tab):
                             save_books(df)
                             st.rerun()
                 st.divider()
-
 show_shelf("Books I Own", tab1)
 show_shelf("Books I Want to Read", tab2)
 show_shelf("Books I've Read", tab3)
