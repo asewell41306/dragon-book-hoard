@@ -182,7 +182,6 @@ def show_shelf(shelf_name, tab):
                             df = df.drop(idx).reset_index(drop=True)
                             save_books(df)
                             st.rerun()
-                            with btn_col1:
                 st.divider()
 
 show_shelf("Books I Own", tab1)
