@@ -94,13 +94,15 @@ def fetch_book_cover(title, author):
     try:
         query = f"{title} {author}".strip()
         url = f"https://openlibrary.org{requests.utils.quote(query)}&limit=1"
-        response = requests.get(url, timeout=5)
+        headers = {"User-Agent": "DragonsSanctuaryBookTracker/1.0"}
+        response = requests.get(url, headers=headers, timeout=5)
         docs = response.json().get("docs", [])
-        if docs and "cover_i" in docs[0]:
-            return f"https://openlibrary.org{docs[0]['cover_i']}-M.jpg"
+        if docs and "cover_i" in docs:
+            return f"https://openlibrary.org{docs['cover_i']}-M.jpg"
     except Exception:
         pass
     return ""
+
 
 # Put Dragon's Whimsy first if she tapped the Willow Stand!
 if door == "willow":
