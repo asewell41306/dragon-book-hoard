@@ -35,6 +35,15 @@ st.markdown("""
     color: white !important;
     box-shadow: 0 0 12px rgba(255, 105, 180, 0.45);
 }
+[data-testid="stAlert"] {
+    background-color: rgba(255, 240, 245, 0.85) !important;
+    border: 1px solid #FFB6C1 !important;
+    border-radius: 15px !important;
+}
+[data-testid="stAlert"] p {
+    color: #E75480 !important;
+}
+    
 @keyframes floatDown {
     0% { transform: translateY(-10vh) rotate(0deg); opacity: 0; }
     15% { opacity: 0.85; }
