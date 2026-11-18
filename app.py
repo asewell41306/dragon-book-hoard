@@ -95,10 +95,10 @@ def fetch_book_cover(title, author):
         query = f"{title} {author}".strip()
         url = f"https://openlibrary.org{requests.utils.quote(query)}&limit=1"
         headers = {"User-Agent": "DragonsSanctuaryBookTracker/1.0"}
-        response = requests.get(url, headers=headers, timeout=5)
+        response = requests.get(url, headers=headers, timeout=8)
         docs = response.json().get("docs", [])
-        if docs and "cover_i" in docs:
-            return f"https://openlibrary.org{docs['cover_i']}-M.jpg"
+        if len(docs) > 0 and "cover_i" in docs[0]:
+            return f"https://openlibrary.org{cover_id}-M.jpg"
     except Exception:
         pass
     return ""
@@ -169,12 +169,12 @@ def show_shelf(shelf_name, tab):
                     btn_col1, btn_col2, btn_col3 = st.columns([2, 2, 1.5])
                     with btn_col1:
                         if st.button(f"Move to {other_shelves}", key=f"m1_{idx}"):
-                            df.at[idx, "Shelf"] = other_shelves
+                            df.at[idx, "Shelf"] = other_shelves[0]
                             save_books(df)
                             st.rerun()
                     with btn_col2:
                         if st.button(f"Move to {other_shelves}", key=f"m2_{idx}"):
-                            df.at[idx, "Shelf"] = other_shelves
+                            df.at[idx, "Shelf"] = other_shelves[1]
                             save_books(df)
                             st.rerun()
                     with btn_col3:
