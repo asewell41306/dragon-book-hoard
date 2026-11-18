@@ -132,6 +132,7 @@ with st.expander("✨ Add a New Book to the Hoard", expanded=False):
 
 # --- Display Books Function ---
 def show_shelf(shelf_name, tab):
+    global df
     with tab:
         shelf_books = df[df["Shelf"] == shelf_name]
         if shelf_books.empty:
