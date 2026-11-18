@@ -14,6 +14,9 @@ st.markdown("""
     background: linear-gradient(180deg, #FFE4EC 0%, #FFB6C1 48%, #E1BEE7 100%);
     background-attachment: fixed;
 }
+.stApp h1, .stApp h2, .stApph3, .stApp p, .stApp label, .stApp span, .stApp div {
+    color: #9C1B5B !important;
+}
 [data-testid="stExpander"] {
     background-color: rgba(255, 255, 255, 0.78);
     border: 1.5px solid #FF69B4;
@@ -27,9 +30,9 @@ st.markdown("""
     color: #4A2545;
     transition: all 0.2s ease;
 }
-.stButton > button:hover {
+.stButton > button:hover, .stButton > button:hover * {
     background-color: #FF69B4;
-    color: white;
+    color: white !important;
     box-shadow: 0 0 12px rgba(255, 105, 180, 0.45);
 }
 @keyframes floatDown {
