@@ -91,17 +91,38 @@ def save_books(updated_df):
     conn.update(worksheet="Sheet1", data=updated_df)
 
 def fetch_book_cover(title, author):
+    query = f"{title} {author}".strip()
+    encoded_q = requests.utils.quote(query)
+    
+    # 1. Try Google Books API first (fast & reliable)
     try:
-        query = f"{title} {author}".strip()
-        url = f"https://openlibrary.org{requests.utils.quote(query)}&limit=1"
-        headers = {"User-Agent": "DragonsSanctuaryBookTracker/1.0"}
-        response = requests.get(url, headers=headers, timeout=8)
-        docs = response.json().get("docs", [])
-        if len(docs) > 0 and "cover_i" in docs[0]:
-            return f"https://openlibrary.org{cover_id}-M.jpg"
+        gb_url = f"https://googleapis.com{encoded_q}&maxResults=1"
+        gb_res = requests.get(gb_url, timeout=5).json()
+        items = gb_res.get("items", [])
+        if items:
+            first_item = next(iter(items))
+            links = first_item.get("volumeInfo", {}).get("imageLinks", {})
+            thumb = links.get("thumbnail") or links.get("smallThumbnail")
+            if thumb:
+                return thumb.replace("http://", "https://")
     except Exception:
         pass
+
+    # 2. Fallback to Open Library API
+    try:
+        ol_url = f"https://openlibrary.org{encoded_q}&limit=1"
+        ol_res = requests.get(ol_url, timeout=5).json()
+        docs = ol_res.get("docs", [])
+        if docs:
+            first_doc = next(iter(docs))
+            cover_id = first_doc.get("cover_i")
+            if cover_id:
+                return f"https://openlibrary.org{cover_id}-M.jpg"
+    except Exception:
+        pass
+
     return ""
+
 
 
 # Put Dragon's Whimsy first if she tapped the Willow Stand!
