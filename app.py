@@ -463,7 +463,7 @@ with tab_whimsy:
         st.session_state.dragon_msg = ""
         
     d_col1, d_col2, d_col3 = st.columns(3)
-     with d_col1:
+    with d_col1:
          if st.button("🥚 Pet Dragon", use_container_width=True):
              new_score = love + 1 update_dragon(new_score)
              st.session_state.dragon_msg = random.choice(dragon_reactions)
