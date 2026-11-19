@@ -82,6 +82,30 @@ st.markdown("""
   <path d="M710 75 Q690 260 705 460 M750 45 Q730 280 745 520 M790 35 Q775 310 788 580 M830 25 Q815 330 828 610 M870 20 Q855 300 868 560 M910 30 Q895 280 908 530 M950 60 Q935 290 948 510" fill="none" stroke="#EC407A" stroke-width="5" stroke-linecap="round"/>
   <!-- Hanging Weeping Willow Vines (Left Corner) -->
   <path d="M45 95 Q35 250 48 420 M85 75 Q75 270 88 470 M130 55 Q120 240 132 410 M175 35 Q165 210 176 360 M220 25 Q212 180 222 310" fill="none" stroke="#EC407A" stroke-width="5" stroke-linecap="round"/>
+  <!-- Aesthetic Celestial Dragon Silhouette (Lower Left) -->
+  <g transform="translate(15, 520) scale(0.95)" opacity="0.65">
+    <defs>
+      <linearGradient id="dragonSil" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#F06292"/>
+        <stop offset="100%" stop-color="#BA68C8"/>
+      </linearGradient>
+    </defs>
+    <!-- Flowing Serpentine Body & Tail -->
+    <path d="M120 440 Q20 420 45 310 Q75 190 190 210 Q285 225 260 325 Q240 395 160 375 Q110 360 135 315 Q155 280 195 295" fill="none" stroke="url(#dragonSil)" stroke-width="22" stroke-linecap="round"/>
+    <path d="M120 440 Q65 465 30 435 Q55 435 75 422" fill="url(#dragonSil)"/>
+    <!-- Sweeping Feathered Wings -->
+    <path d="M145 225 Q85 110 10 135 Q55 165 40 195 Q85 195 95 225 Q120 215 145 225 Z" fill="url(#dragonSil)" opacity="0.8"/>
+    <path d="M175 215 Q155 95 85 85 Q115 125 100 155 Q135 160 145 195 Z" fill="url(#dragonSil)" opacity="0.6"/>
+    <!-- Elegant Dragon Neck, Head & Horns -->
+    <path d="M190 210 Q245 170 235 115 Q230 90 265 82 Q245 102 248 118 Q275 112 292 122 Q265 135 242 135 Q232 175 205 212 Z" fill="url(#dragonSil)"/>
+    <!-- Swept-Back Antler Horns -->
+    <path d="M235 98 Q205 55 175 50 Q205 68 225 102 M244 92 Q225 45 198 35 Q222 58 236 96" fill="none" stroke="url(#dragonSil)" stroke-width="5" stroke-linecap="round"/>
+    <!-- Soft Sparkles Around Dragon -->
+    <circle cx="280" cy="85" r="3.5" fill="#FFF9C4"/>
+    <circle cx="95" cy="105" r="3" fill="#FFF9C4"/>
+    <circle cx="295" cy="240" r="4" fill="#FFF9C4"/>
+  </g>
+
 </svg>
 """, unsafe_allow_html=True)
 
