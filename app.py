@@ -365,32 +365,35 @@ with tab_whimsy:
         "A tiny heart-shaped smoke ring floats up from his nose! 💕💨",
         "He nuzzles your hand and drops a shiny pink crystal at your feet! 💎🌸"
     ]
+   
+    if "dragon_msg" not in st.session_state:
+        st.session_state.dragon_msg = ""
 
     d_col1, d_col2, d_col3 = st.columns(3)
     with d_col1:
         if st.button("🥚 Pet Dragon", use_container_width=True):
             new_score = love + 1
             update_dragon(new_score)
+            st.session_state.dragon_msg = random.choice(dragon_reactions)
             if new_score == 15:
                 st.balloons()
-            st.toast(random.choice(dragon_reactions))
             st.rerun()
     with d_col2:
         if st.button("🍓 Feed Berry", use_container_width=True):
             new_score = love + 2
             update_dragon(new_score)
+            st.session_state.dragon_msg = "Nom nom! He gobbles the sweet dragonberry and does a happy spin! 🍓🐉"
             if new_score >= 15:
                 st.balloons()
-            st.toast("Nom nom! He gobbles the sweet dragonberry and does a happy spin! 🍓🐉")
             st.rerun()
     with d_col3:
         if st.button("💎 Shiny Gem", use_container_width=True):
             new_score = love + 3
             update_dragon(new_score)
+            st.session_state.dragon_msg = "Ooooh! He adds the pink gem to his treasure hoard and purrs loudly! 💎✨"
             if new_score >= 15:
                 st.balloons()
-            st.toast("Ooooh! He adds the pink gem to his treasure hoard and purrs loudly! 💎✨")
             st.rerun()
 
-
-
+    if st.session_state.dragon_msg:
+        st.info(st.session_state.dragon_msg)
