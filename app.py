@@ -129,6 +129,12 @@ def fetch_book_cover(title, author):
     return ""
 
 # --- Hoard Stats & Reading Goal Bar ---
+try:
+    goal_df = conn.read(worksheet="DragonStats", ttl=0)
+    reading_goal = int(goal_df.at[0, "Goal"]) if "Goal" in goal_df.columns and pd.notna(goal_df.at[0, "Goal"]) else 20
+except Exception:
+    reading_goal = 20
+    
 books_read_count = len(df[df["Shelf"] == "Books I've Read"])
 books_owned_count = len(df[df["Shelf"] == "Books I Own"])
 tbr_count = len(df[df["Shelf"] == "Books I Want to Read"])
@@ -140,6 +146,18 @@ stat2.metric("✨ Want to Read", tbr_count)
 stat3.metric("💖 Completed", f"{books_read_count} / {READING_GOAL}")
 st.progress(min(books_read_count / READING_GOAL, 1.0))
 
+with st.expander("🎯 Set My Reading Goal", expanded=False):
+    new_goal = st.number_input("How many books do you want to read?", min_value = 1, max_value = 10000, value=reading_goal, step=1)
+    if st.button("Update Goal ✨", use_container_width=True):
+        try: 
+            g_df = conn.read(worksheet="DragonStats", ttl=0)
+            g_df.at[0, "Goal"] = int(new_goal)
+            conn.update(worksheet="DragonStats", data=g_df)
+            st.success(f"Reading goal updated to {int(new_goal)} books!")
+            st.rerun()
+        except Exception:
+            st.warning("Make sure cell E1 in DragonStats is named 'Goal'!")
+            
 # Put Dragon's Whimsy first if she tapped the Willow Stand!
 if door == "willow":
     tab_whimsy, tab1, tab2, tab3 = st.tabs([
