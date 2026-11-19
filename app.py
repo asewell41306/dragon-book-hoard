@@ -17,6 +17,9 @@ st.markdown("""
     background: linear-gradient(180deg, #FFE4EC 0%, #FFB6C1 48%, #E1BEE7 100%);
     background-attachment: fixed;
 }
+[data-testid="stHeader"], [data-testid="stToolbar"], [data-testid="stDecoration"] {
+    display: none !important;
+}
 .stApp h1, .stApp h2, .stApp h3, .stApp p, .stApp label, .stApp span, .stApp div {
     color: #9C1B5B !important;
 }
