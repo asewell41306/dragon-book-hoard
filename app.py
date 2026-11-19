@@ -128,7 +128,7 @@ def fetch_book_cover(title, author):
         pass
     return ""
 
-# --- Hoard Stats & Reading Goal Bar ---
+# --- Hoard Stats & Custom Reading Goal Bar ---
 try:
     goal_df = conn.read(worksheet="DragonStats", ttl=0)
     if "Goal" in goal_df.columns and not goal_df.empty and pd.notna(goal_df.at[0, "Goal"]):
@@ -136,7 +136,7 @@ try:
     else:
         reading_goal = 20
 except Exception:
-    goal_df = pd.DataFrame([{"Goal": 20}])
+    goal_df = pd.DataFrame([{"Love": 0, "LastFed": 0, "Name": "Baby Dragon", "Accessory": "None", "Goal": 20}])
     reading_goal = 20
 
 books_read_count = len(df[df["Shelf"] == "Books I've Read"])
@@ -153,14 +153,14 @@ with st.expander("🎯 Set My Reading Goal", expanded=False):
     new_goal = st.number_input("How many books do you want to read?", min_value=1, max_value=500, value=reading_goal, step=1)
     if st.button("Update Goal ✨", use_container_width=True):
         if goal_df.empty:
-            goal_df = pd.DataFrame([{"Goal": int(new_goal)}])
+            goal_df = pd.DataFrame([{"Love": 0, "LastFed": 0, "Name": "Baby Dragon", "Accessory": "None", "Goal": int(new_goal)}])
         else:
             goal_df.at[0, "Goal"] = int(new_goal)
         conn.update(worksheet="DragonStats", data=goal_df)
         st.cache_data.clear()
         st.success(f"Reading goal updated to {int(new_goal)} books!")
         st.rerun()
-            
+
 # Put Dragon's Whimsy first if she tapped the Willow Stand!
 if door == "willow":
     tab_whimsy, tab1, tab2, tab3 = st.tabs([
@@ -355,13 +355,11 @@ with tab_whimsy:
         last_fed = float(dragon_df.at[0, "LastFed"]) if "LastFed" in dragon_df.columns and not dragon_df.empty and pd.notna(dragon_df.at[0, "LastFed"]) else time.time()
         dragon_name = str(dragon_df.at[0, "Name"]) if "Name" in dragon_df.columns and not dragon_df.empty and pd.notna(dragon_df.at[0, "Name"]) else "Baby Dragon"
         accessory = str(dragon_df.at[0, "Accessory"]) if "Accessory" in dragon_df.columns and not dragon_df.empty and pd.notna(dragon_df.at[0, "Accessory"]) else "None"
-        saved_goal = int(float(dragon_df.at[0, "Goal"])) if "Goal" in dragon_df.columns and not dragon_df.empty and pd.notna(dragon_df.at[0, "Goal"]) else 20
     except Exception:
         saved_love = 0
         last_fed = time.time()
         dragon_name = "Baby Dragon"
         accessory = "None"
-        saved_goal = 20
 
     if last_fed > 0:
         hours_away = (time.time() - last_fed) / 3600
@@ -376,7 +374,7 @@ with tab_whimsy:
             "LastFed": time.time(),
             "Name": new_name,
             "Accessory": new_acc,
-            "Goal": saved_goal
+            "Goal": reading_goal
         }])
         conn.update(worksheet="DragonStats", data=new_df)
         st.cache_data.clear()
@@ -434,6 +432,7 @@ with tab_whimsy:
           </svg>
         </div>
         """
+
     dragon_svg = "\n".join(line.strip() for line in dragon_svg.splitlines())
     st.markdown(dragon_svg, unsafe_allow_html=True)
 
@@ -446,11 +445,12 @@ with tab_whimsy:
     elif love < 15:
         mood = f"💖 {dragon_name} is doing happy wing flaps around your shelves"
     else:
-        mood = f" 👑 {dragon_name} is the Supreme Guardian of the Book Hoard!"
+        mood = f"👑 {dragon_name} is the Supreme Guardian of the Book Hoard!"
 
     st.write(f"**Current Mood:** {mood}")
+
     st.progress(min(love / 15, 1.0), text=f"Dragon Affection: {love} 💖")
-    
+
     dragon_reactions = [
         f"{dragon_name} chirps softly and curls his tail around your wrist! 💕🐉",
         f"{dragon_name} sneezes a tiny puff of rose-gold glitter onto your book! ✨🌸",
@@ -458,19 +458,19 @@ with tab_whimsy:
         f"{dragon_name} puffs out his chest proudly to guard your favorite books! 📚🐉",
         f"A tiny heart-shaped smoke ring floats up from {dragon_name}'s nose! 💕💨"
     ]
-    
+
     if "dragon_msg" not in st.session_state:
         st.session_state.dragon_msg = ""
-        
+
     d_col1, d_col2, d_col3 = st.columns(3)
     with d_col1:
-         if st.button("🥚 Pet Dragon", use_container_width=True):
-             new_score = love + 1
-             update_dragon(new_score)
-             st.session_state.dragon_msg = random.choice(dragon_reactions)
-             if new_score == 15:
-                 st.balloons()
-            st.rerun(
+        if st.button("🥚 Pet Dragon", use_container_width=True):
+            new_score = love + 1
+            update_dragon(new_score)
+            st.session_state.dragon_msg = random.choice(dragon_reactions)
+            if new_score == 15:
+                st.balloons()
+            st.rerun()
     with d_col2:
         if st.button("🍓 Feed Berry", use_container_width=True):
             new_score = love + 2
@@ -487,23 +487,22 @@ with tab_whimsy:
             if new_score >= 15:
                 st.balloons()
             st.rerun()
-            
+
     if st.session_state.dragon_msg:
         st.info(st.session_state.dragon_msg)
 
-# --- Dragon Name & Accessory Closet ---
-auto_open_naming = (love > 0 and dragon_name == "Baby Dragon")
-with st.expander(f"🎀 Customize {dragon_name} (Name & Accessories)", expanded=auto_open_naming):
-    new_dragon_name = st.text_input("Give your dragon a name:", value="" if dragon_name == "Baby Dragon" else dragon_name, placeholder="Type a name...")
-    acc_options = ["None", "🌸 Flower Crown", "👓 Reading Glasses", "👑 Royal Crown"]
-    current_acc_idx = acc_options.index(accessory) if accessory in acc_options else 0
-    chosen_acc = st.selectbox("Equip Accessory (Unlocks at 3+ Affection)", acc_options, index=current_acc_idx)
+    # --- Dragon Name & Accessory Closet ---
+    auto_open_naming = (love > 0 and dragon_name == "Baby Dragon")
+    with st.expander(f"🎀 Customize {dragon_name} (Name & Accessories)", expanded=auto_open_naming):
+        new_dragon_name = st.text_input("Give your dragon a name:", value="" if dragon_name == "Baby Dragon" else dragon_name, placeholder="Type a name...")
+        acc_options = ["None", "🌸 Flower Crown", "👓 Reading Glasses", "👑 Royal Crown"]
+        current_acc_idx = acc_options.index(accessory) if accessory in acc_options else 0
+        chosen_acc = st.selectbox("Equip Accessory (Unlocks at 3+ Affection)", acc_options, index=current_acc_idx)
 
-    if st.button("Save Dragon Look ✨", use_container_width=True):
-        if chosen_acc != "None" and love < 3:
-            st.warning("Pet or feed your dragon to reach 3+ Affection first to unlock accessories! 🥚")
-        else:
-            update_dragon(love, new_name=new_dragon_name.strip() or "Baby Dragon", new_acc=chosen_acc)
-            st.success(f"Updated {new_dragon_name.strip() or 'Baby Dragon'}!")
-            st.rerun()
-
+        if st.button("Save Dragon Look ✨", use_container_width=True):
+            if chosen_acc != "None" and love < 3:
+                st.warning("Pet or feed your dragon to reach 3+ Affection first to unlock accessories! 🥚")
+            else:
+                update_dragon(love, new_name=new_dragon_name.strip() or "Baby Dragon", new_acc=chosen_acc)
+                st.success(f"Updated {new_dragon_name.strip() or 'Baby Dragon'}!")
+                st.rerun()
