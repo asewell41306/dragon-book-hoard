@@ -372,16 +372,22 @@ with tab_whimsy:
         love = saved_love
 
     def update_dragon(new_love, new_name=dragon_name, new_acc=accessory, new_col=dragon_color):
-        new_df = pd.DataFrame([{
-            "Love": new_love,
-            "LastFed": time.time(),
-            "Name": new_name,
-            "Accessory": new_acc,
-            "Goal": reading_goal,
-            "Color": new_col
-        }])
-        conn.update(worksheet="DragonStats", data=new_df)
-        st.cache_data.clear()
+        st.session_state.cached_love = new_love
+        st.session_state.cached_name = new_name
+        st.session_state.cached_acc = new_acc
+        st.session_state.cached_col = new_col
+        try:
+            new_df = pd.DataFrame([{
+                "Love": new_love,
+                "LastFed": time.time(),
+                "Name": new_name,
+                "Accessory": new_acc,
+                "Goal": reading_goal,
+                "Color": new_col
+            }])
+            conn.update(worksheet="DragonStats", data=new_df)
+        except Exception:
+            pass
 
     if "dragon_msg" not in st.session_state:
         st.session_state.dragon_msg = ""
