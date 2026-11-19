@@ -131,32 +131,35 @@ def fetch_book_cover(title, author):
 # --- Hoard Stats & Reading Goal Bar ---
 try:
     goal_df = conn.read(worksheet="DragonStats", ttl=0)
-    reading_goal = int(goal_df.at[0, "Goal"]) if "Goal" in goal_df.columns and pd.notna(goal_df.at[0, "Goal"]) else 20
+    if "Goal" in goal_df.columns and not goal_df.empty and pd.notna(goal_df.at[0, "Goal"]):
+        reading_goal = int(float(goal_df.at[0, "Goal"]))
+    else:
+        reading_goal = 20
 except Exception:
+    goal_df = pd.DataFrame([{"Goal": 20}])
     reading_goal = 20
-    
+
 books_read_count = len(df[df["Shelf"] == "Books I've Read"])
 books_owned_count = len(df[df["Shelf"] == "Books I Own"])
 tbr_count = len(df[df["Shelf"] == "Books I Want to Read"])
-READING_GOAL = 20
 
 stat1, stat2, stat3 = st.columns(3)
 stat1.metric("🐉 Owned", books_owned_count)
 stat2.metric("✨ Want to Read", tbr_count)
-stat3.metric("💖 Completed", f"{books_read_count} / {READING_GOAL}")
-st.progress(min(books_read_count / READING_GOAL, 1.0))
+stat3.metric("💖 Completed", f"{books_read_count} / {reading_goal}")
+st.progress(min(books_read_count / max(reading_goal, 1), 1.0))
 
 with st.expander("🎯 Set My Reading Goal", expanded=False):
-    new_goal = st.number_input("How many books do you want to read?", min_value = 1, max_value = 10000, value=reading_goal, step=1)
+    new_goal = st.number_input("How many books do you want to read?", min_value=1, max_value=500, value=reading_goal, step=1)
     if st.button("Update Goal ✨", use_container_width=True):
-        try: 
-            g_df = conn.read(worksheet="DragonStats", ttl=0)
-            g_df.at[0, "Goal"] = int(new_goal)
-            conn.update(worksheet="DragonStats", data=g_df)
-            st.success(f"Reading goal updated to {int(new_goal)} books!")
-            st.rerun()
-        except Exception:
-            st.warning("Make sure cell E1 in DragonStats is named 'Goal'!")
+        if goal_df.empty:
+            goal_df = pd.DataFrame([{"Goal": int(new_goal)}])
+        else:
+            goal_df.at[0, "Goal"] = int(new_goal)
+        conn.update(worksheet="DragonStats", data=goal_df)
+        st.cache_data.clear()
+        st.success(f"Reading goal updated to {int(new_goal)} books!")
+        st.rerun()
             
 # Put Dragon's Whimsy first if she tapped the Willow Stand!
 if door == "willow":
