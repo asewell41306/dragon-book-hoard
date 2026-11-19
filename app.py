@@ -105,7 +105,46 @@ st.markdown("""
     <circle cx="95" cy="105" r="3" fill="#FFF9C4"/>
     <circle cx="295" cy="240" r="4" fill="#FFF9C4"/>
   </g>
+ <!-- Enchanted Fairy Bookshelf at the Base of the Willow Tree (Lower Right) -->
+  <g transform="translate(690, 710)" opacity="0.75">
+    <!-- Arched Wooden Bookcase Built Into the Roots -->
+    <path d="M20 290 L20 110 Q125 20 230 110 L230 290 Z" fill="#8D6E63" opacity="0.45"/>
+    <path d="M35 290 L35 118 Q125 40 215 118 L215 290 Z" fill="#F8BBD0" opacity="0.55"/>
+    <!-- Wooden Shelves -->
+    <rect x="32" y="135" width="186" height="8" rx="3" fill="#8D6E63"/>
+    <rect x="32" y="205" width="186" height="8" rx="3" fill="#8D6E63"/>
+    <rect x="32" y="275" width="186" height="10" rx="3" fill="#8D6E63"/>
+    <!-- Top Shelf Books -->
+    <rect x="55" y="92" width="14" height="43" rx="2" fill="#EC407A"/>
+    <rect x="72" y="98" width="12" height="37" rx="2" fill="#AB47BC"/>
+    <rect x="87" y="88" width="15" height="47" rx="2" fill="#F48FB1"/>
+    <rect x="105" y="96" width="13" height="39" rx="2" fill="#CE93D8"/>
+    <rect x="122" y="102" width="14" height="33" rx="2" fill="#F06292" transform="rotate(-12 122 135)"/>
+    <!-- Middle Shelf Books + Mini Lantern -->
+    <rect x="48" y="160" width="15" height="45" rx="2" fill="#BA68C8"/>
+    <rect x="66" y="166" width="13" height="39" rx="2" fill="#F06292"/>
+    <rect x="82" y="158" width="16" height="47" rx="2" fill="#E1BEE7"/>
+    <!-- Stacked Horizontal Books -->
+    <rect x="125" y="193" width="48" height="12" rx="3" fill="#EC407A"/>
+    <rect x="130" y="181" width="42" height="12" rx="3" fill="#CE93D8"/>
+    <circle cx="151" cy="172" r="8" fill="#FFF9C4"/>
+    <!-- Bottom Shelf Books -->
+    <rect x="52" y="230" width="16" height="45" rx="2" fill="#F06292"/>
+    <rect x="71" y="236" width="14" height="39" rx="2" fill="#9575CD"/>
+    <rect x="88" y="226" width="15" height="49" rx="2" fill="#F48FB1"/>
+    <rect x="106" y="234" width="14" height="41" rx="2" fill="#BA68C8"/>
+    <rect x="145" y="232" width="15" height="43" rx="2" fill="#EC407A"/>
+    <rect x="163" y="238" width="14" height="37" rx="2" fill="#CE93D8"/>
+  </g>
 
+  <!-- Floating Open Storybook & Rising Sparkles (Center) -->
+  <g transform="translate(430, 440) rotate(-8)" opacity="0.65">
+    <path d="M0 30 Q35 15 70 32 Q105 15 140 30 L140 78 Q105 63 70 80 Q35 63 0 78 Z" fill="#FFF5F8" stroke="#EC407A" stroke-width="4"/>
+    <line x1="70" y1="32" x2="70" y2="80" stroke="#EC407A" stroke-width="3"/>
+    <circle cx="52" cy="8" r="4" fill="#FFF9C4"/>
+    <circle cx="88" cy="-4" r="5" fill="#FFF9C4"/>
+    <circle cx="70" cy="-18" r="3.5" fill="#FFF9C4"/>
+  </g>
 </svg>
 """, unsafe_allow_html=True)
 
