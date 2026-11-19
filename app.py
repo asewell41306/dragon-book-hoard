@@ -275,4 +275,174 @@ with tab_whimsy:
         "You make ordinary days feel way better just by being around. ✨",
         "Take a second to relax today—you've earned it. 🌷",
         "Still my favorite adventure partner. 💕",
-        "Random reminder that I appreciate everything you do. 💖",]
+        "Random reminder that I appreciate everything you do. 💖",
+        "Drink some water, grab a snack, and know I'm rooting for you today! 🌸",
+        "If I had to pick one person to get stuck in a bookstore with forever, it's easily you. 📖💕",
+        "You deserve a super cozy, stress-free day today. ✨",
+        "Redeem this note anytime for one extra-long hug and your favorite drink. 🎟️💖"
+    ]
+
+    date_ideas = [
+        "📚 Bookstore browse + iced coffee run afterward",
+        "🍿 Cozy movie marathon on the couch with all your favorite snacks",
+        "🌸 Picnic in the park with pastries and a good book",
+        "🎨 At-home paint night with takeout and a good playlist",
+        "🍜 Dinner at your favorite spot + an evening walk",
+        "🧁 Bake something from scratch together at home",
+        "🚗 Sunset drive with good music and milkshakes",
+        "🛍️ Thrift-store challenge: pick out cozy outfits for each other under $20",
+        "🎲 Board game or co-op video game night",
+        "🎟️ Mystery date night—you pick cozy or fancy, and I'll handle the rest"
+    ]
+
+    col_a, col_b = st.columns(2)
+    with col_a:
+        if st.button("💌 Draw a Note", use_container_width=True):
+            st.balloons()
+            st.success(random.choice(love_notes))
+    with col_b:
+        if st.button("✨ Spin Date Idea", use_container_width=True):
+            st.info(random.choice(date_ideas))
+
+    # --- Open When Letters ---
+    st.write("")
+    open_when = st.selectbox("✉️ Open When...", [
+        "Choose a letter to open...",
+        "Open when you're having a stressful day",
+        "Open when you just finished a great book",
+        "Open when you miss me",
+        "Open when you can't decide what to do tonight"
+    ])
+
+    open_when_messages = {
+        "Open when you're having a stressful day": "Take a deep breath and drop your shoulders. Whatever is stressing you out today is temporary—text me if you want to vent, or let me bring you dinner tonight so you don't have to cook. 💖",
+        "Open when you just finished a great book": "Log your rating on the shelf right now! Whenever you're ready, I want to hear the full spoiler-filled rant about what happened. 📖✨",
+        "Open when you miss me": "I miss you too! Send me a text right now so we can plan when we're hanging out next. 💕",
+        "Open when you can't decide what to do tonight": "Hit the 'Spin Date Idea' button right above this, or cash in one of your treat coupons below—my treat! 🐉"
+    }
+    if open_when in open_when_messages:
+        st.info(open_when_messages[open_when])
+
+    # --- Redeemable Treat Coupons ---
+    with st.expander("🎟️ Redeem a Treat Coupon", expanded=False):
+        coupon_choice = st.selectbox("Pick a coupon to cash in:", [
+            "☕ 1 Free Iced Coffee / Favorite Drink Delivery",
+            "🎬 Complete Movie Night Pick (No Vetoes)",
+            "💆‍♀️ 15-Minute Back or Shoulder Rub",
+            "🥡 Dinner Takeout of Your Choice",
+            "📚 $20 Bookstore Gift Card / Book Run"
+        ])
+        if st.button("Redeem Coupon Now 🌸", use_container_width=True):
+            try:
+                c_df = conn.read(worksheet="Coupons", ttl=0)
+                new_c = pd.DataFrame([{
+                    "Coupon": coupon_choice,
+                    "RedeemedAt": datetime.now().strftime("%Y-%m-%d %I:%M %p")
+                }])
+                c_df = pd.concat([c_df, new_c], ignore_index=True)
+                conn.update(worksheet="Coupons", data=c_df)
+            except Exception:
+                pass
+            st.balloons()
+            st.success(f"Redeemed: **{coupon_choice}**! Screenshot this or let me know so I can deliver! 💖")
+
+    st.divider()
+
+    # --- Interactive Baby Dragon Companion ---
+    try:
+        dragon_df = conn.read(worksheet="DragonStats", ttl=0)
+        saved_love = int(float(dragon_df.at[0, "Love"])) if "Love" in dragon_df.columns and not dragon_df.empty and pd.notna(dragon_df.at[0, "Love"]) else 0
+        last_fed = float(dragon_df.at[0, "LastFed"]) if "LastFed" in dragon_df.columns and not dragon_df.empty and pd.notna(dragon_df.at[0, "LastFed"]) else time.time()
+        dragon_name = str(dragon_df.at[0, "Name"]) if "Name" in dragon_df.columns and not dragon_df.empty and pd.notna(dragon_df.at[0, "Name"]) else "Baby Dragon"
+        accessory = str(dragon_df.at[0, "Accessory"]) if "Accessory" in dragon_df.columns and not dragon_df.empty and pd.notna(dragon_df.at[0, "Accessory"]) else "None"
+        saved_goal = int(float(dragon_df.at[0, "Goal"])) if "Goal" in dragon_df.columns and not dragon_df.empty and pd.notna(dragon_df.at[0, "Goal"]) else 20
+    except Exception:
+        saved_love = 0
+        last_fed = time.time()
+        dragon_name = "Baby Dragon"
+        accessory = "None"
+        saved_goal = 20
+
+    if last_fed > 0:
+        hours_away = (time.time() - last_fed) / 3600
+        decay = int(hours_away // 12)
+        love = max(0, saved_love - decay)
+    else:
+        love = saved_love
+
+    def update_dragon(new_love, new_name=dragon_name, new_acc=accessory):
+        new_df = pd.DataFrame([{
+            "Love": new_love,
+            "LastFed": time.time(),
+            "Name": new_name,
+            "Accessory": new_acc,
+            "Goal": saved_goal
+        }])
+        conn.update(worksheet="DragonStats", data=new_df)
+        st.cache_data.clear()
+
+    st.subheader(f"🐉 {dragon_name} — Your Guardian Dragon")
+
+    # --- Cute Animated Pink Baby Dragon SVG with Accessories ---
+    if love == 0:
+        dragon_svg = """
+        <div style="text-align:center; margin: 10px 0;">
+          <svg width="150" height="150" viewBox="0 0 200 200">
+            <ellipse cx="100" cy="115" rx="52" ry="65" fill="#FFD1DC" stroke="#FF69B4" stroke-width="4"/>
+            <path d="M52 105 L75 92 L95 108 L115 90 L135 106 L148 98" fill="none" stroke="#FF69B4" stroke-width="4" stroke-linecap="round"/>
+            <circle cx="80" cy="135" r="7" fill="#FF9EBB"/>
+            <circle cx="122" cy="80" r="5" fill="#FF9EBB"/>
+            <text x="135" y="55" font-size="22" fill="#9C1B5B">💤</text>
+          </svg>
+        </div>
+        """
+    else:
+        acc_svg = ""
+        if accessory == "👑 Royal Crown" or (accessory == "None" and love >= 15):
+            acc_svg = '<polygon points="82,42 90,25 100,38 110,25 118,42" fill="#FFD700" stroke="#E6AC00" stroke-width="2"/>'
+        elif accessory == "🌸 Flower Crown":
+            acc_svg = '<circle cx="82" cy="44" r="7" fill="#FF69B4"/><circle cx="100" cy="41" r="8" fill="#FFB6C1"/><circle cx="118" cy="44" r="7" fill="#FF69B4"/><circle cx="100" cy="41" r="3" fill="#FFD700"/>'
+        elif accessory == "👓 Reading Glasses":
+            acc_svg = '<circle cx="86" cy="78" r="10" fill="none" stroke="#4A2545" stroke-width="2.5"/><circle cx="114" cy="78" r="10" fill="none" stroke="#4A2545" stroke-width="2.5"/><line x1="96" y1="78" x2="104" y2="78" stroke="#4A2545" stroke-width="2.5"/>'
+
+        hearts = '<text x="142" y="55" font-size="20">💖</text><text x="38" y="65" font-size="18">✨</text>' if love >= 5 else ''
+        dragon_svg = f"""
+        <style>
+        @keyframes dragonBounce {{
+            0%, 100% {{ transform: translateY(0px); }}
+            50% {{ transform: translateY(-7px); }}
+        }}
+        .baby-dragon {{ animation: dragonBounce 2.2s ease-in-out infinite; }}
+        </style>
+        <div style="text-align:center; margin: 10px 0;">
+          <svg class="baby-dragon" width="165" height="165" viewBox="0 0 200 200">
+            <path d="M55 105 Q20 75 40 120 Q30 135 58 130 Z" fill="#FF9EBB" stroke="#FF69B4" stroke-width="3"/>
+            <path d="M145 105 Q180 75 160 120 Q170 135 142 130 Z" fill="#FF9EBB" stroke="#FF69B4" stroke-width="3"/>
+            <path d="M135 155 Q175 155 170 130 Q165 120 155 130" fill="none" stroke="#FF69B4" stroke-width="8" stroke-linecap="round"/>
+            <ellipse cx="100" cy="135" rx="42" ry="45" fill="#FFB6C1" stroke="#FF69B4" stroke-width="3.5"/>
+            <ellipse cx="100" cy="140" rx="26" ry="30" fill="#FFE4EC"/>
+            <circle cx="100" cy="82" r="38" fill="#FFB6C1" stroke="#FF69B4" stroke-width="3.5"/>
+            <polygon points="75,52 68,32 86,46" fill="#FFF0F5" stroke="#FF69B4" stroke-width="3"/>
+            <polygon points="125,52 132,32 114,46" fill="#FFF0F5" stroke="#FF69B4" stroke-width="3"/>
+            {acc_svg}
+            <path d="M80 80 Q86 72 92 80" fill="none" stroke="#4A2545" stroke-width="3.5" stroke-linecap="round"/>
+            <path d="M108 80 Q114 72 120 80" fill="none" stroke="#4A2545" stroke-width="3.5" stroke-linecap="round"/>
+            <ellipse cx="75" cy="90" rx="7" ry="4" fill="#FF69B4" opacity="0.6"/>
+            <ellipse cx="125" cy="90" rx="7" ry="4" fill="#FF69B4" opacity="0.6"/>
+            <path d="M93 93 Q100 100 107 93" fill="none" stroke="#4A2545" stroke-width="3" stroke-linecap="round"/>
+            {hearts}
+          </svg>
+        </div>
+        """
+    dragon_svg = "\n".join(line.strip() for line in dragon_svg.splitlines())
+    st.markdown(dragon_svg, unsafe_allow_html=True)
+
+    if love == 0:
+        mood = f"😴 {dragon_name} is fast asleep in his egg (Tap below to wake him up!)"
+    elif love < 5:
+        mood = f"🌸 {dragon_name} is curled up and purring happily"
+    elif love < 10:
+        mood = f"✨ {dragon_name} is blowing tiny heart-shaped smoke rings"
+    elif love < 15:
+        mood = f"💖 {dragon_name} is doing happy wing flaps around your shelves"
+    else:
