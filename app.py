@@ -73,9 +73,9 @@ st.markdown("""
 <div class="petal" style="left: 8%; animation-duration: 11s; animation-delay: 0s;">🌸</div>
 <div class="petal" style="left: 24%; animation-duration: 14s; animation-delay: 3s;">✨</div>
 <div class="petal" style="left: 42%; animation-duration: 12s; animation-delay: 1.5s;">🌸</div>
-<div class="petal" style="left: 65%; animation-duration: 15s; animation-delay: 4s;">🌷</div>
-<div class="petal" style="left: 65%; animation-duration: 15s; animation-delay: 4s;">❤️</div>
-<div class="petal" style="left: 65%; animation-duration: 15s; animation-delay: 4s;">🐉</div>
+<div class="petal" style="left: 52%; animation-duration: 15s; animation-delay: 4s;">🌷</div>
+<div class="petal" style="left: 65%; animation-duration: 13s; animation-delay: 2.5s;">❤️</div>
+<div class="petal" style="left: 74%; animation-duration: 16s; animation-delay: 5.5s;">🐉</div>
 <div class="petal" style="left: 82%; animation-duration: 10s; animation-delay: 2s;">✨</div>
 <div class="petal" style="left: 93%; animation-duration: 13s; animation-delay: 5s;">🌸</div>
 """, unsafe_allow_html=True)
@@ -92,7 +92,7 @@ conn = st.connection("gsheets", type=GSheetsConnection)
 COLUMNS = ["Title", "Author", "Shelf", "Rating", "Notes", "CoverURL"]
 SHELVES = ["Books I Own", "Books I Want to Read", "Books I've Read"]
 
-df = conn.read(worksheet="Sheet1", ttl=0)
+df = conn.read(worksheet="Sheet1", ttl=60)
 if df.empty or list(df.columns) != COLUMNS:
     df = pd.DataFrame(columns=COLUMNS)
 else:
@@ -100,6 +100,7 @@ else:
 
 def save_books(updated_df):
     conn.update(worksheet="Sheet1", data=updated_df)
+    st.cache_data.clear()
 
 def fetch_book_cover(title, author):
     query = f"{title} {author}".strip()
