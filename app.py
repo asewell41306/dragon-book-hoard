@@ -90,7 +90,7 @@ conn = st.connection("gsheets", type=GSheetsConnection)
 COLUMNS = ["Title", "Author", "Shelf", "Rating", "Notes", "CoverURL"]
 SHELVES = ["Books I Own", "Books I Want to Read", "Books I've Read"]
 
-df = conn.read(worksheet="Sheet1", ttl=0)
+df = conn.read(worksheet="Sheet1", ttl=60)
 if df.empty or list(df.columns) != COLUMNS:
     df = pd.DataFrame(columns=COLUMNS)
 else:
@@ -98,6 +98,7 @@ else:
 
 def save_books(updated_df):
     conn.update(worksheet="Sheet1", data=updated_df)
+    st.cache_data.clear()
 
 def fetch_book_cover(title, author):
     query = f"{title} {author}".strip()
@@ -334,7 +335,7 @@ with tab_whimsy:
         ])
         if st.button("Redeem Coupon Now 🌸", use_container_width=True):
             try:
-                c_df = conn.read(worksheet="Coupons", ttl=0)
+                c_df = conn.read(worksheet="Coupons", ttl=60)
                 new_c = pd.DataFrame([{
                     "Coupon": coupon_choice,
                     "RedeemedAt": datetime.now().strftime("%Y-%m-%d %I:%M %p")
@@ -350,7 +351,7 @@ with tab_whimsy:
 
     # --- Interactive Baby Dragon Companion ---
     try:
-        dragon_df = conn.read(worksheet="DragonStats", ttl=0)
+        dragon_df = conn.read(worksheet="DragonStats", ttl=60)
         saved_love = int(float(dragon_df.at[0, "Love"])) if "Love" in dragon_df.columns and not dragon_df.empty and pd.notna(dragon_df.at[0, "Love"]) else 0
         last_fed = float(dragon_df.at[0, "LastFed"]) if "LastFed" in dragon_df.columns and not dragon_df.empty and pd.notna(dragon_df.at[0, "LastFed"]) else time.time()
         dragon_name = str(dragon_df.at[0, "Name"]) if "Name" in dragon_df.columns and not dragon_df.empty and pd.notna(dragon_df.at[0, "Name"]) else "Baby Dragon"
