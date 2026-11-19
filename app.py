@@ -3,6 +3,7 @@ from streamlit_gsheets import GSheetsConnection
 import pandas as pd
 import requests
 import random
+import time
 
 # Page setup
 st.set_page_config(page_title="The Dragon's Sanctuary", page_icon="🐉")
@@ -261,15 +262,77 @@ with tab_whimsy:
         if st.button("✨ Spin Whimsical Date Idea", use_container_width=True):
             st.info(random.choice(date_ideas))
 
+    # Interactive Baby Dragon 
     st.divider()
     st.subheader("🐉 Your Pink Baby Guardian Dragon")
 
-    # Track dragon affection during her session
-    if "dragon_love" not in st.session_state:
-        st.session_state.dragon_love = 0
+    # Read saved dragon affection & calculate gentle decay (1 point per 12 hours)
+    try:
+        dragon_df = conn.read(worksheet="DragonStats", ttl=0)
+        saved_love = int(dragon_df.at[0, "Love"]) if not dragon_df.empty else 0
+        last_fed = float(dragon_df.at[0, "LastFed"]) if not dragon_df.empty else time.time()
+    except Exception:
+        saved_love = 0
+        last_fed = time.time()
 
-    # Determine dragon's current mood based on affection points
-    love = st.session_state.dragon_love
+    if last_fed > 0:
+        hours_away = (time.time() - last_fed) / 3600
+        decay = int(hours_away // 12)
+        love = max(0, saved_love - decay)
+    else:
+        love = saved_love
+
+    def update_dragon(new_love):
+        new_df = pd.DataFrame([{"Love": new_love, "LastFed": time.time()}])
+        conn.update(worksheet="DragonStats", data=new_df)
+
+    # --- Cute Animated Pink Baby Dragon SVG ---
+    if love == 0:
+        dragon_svg = """
+        <div style="text-align:center; margin: 10px 0;">
+          <svg width="150" height="150" viewBox="0 0 200 200">
+            <ellipse cx="100" cy="115" rx="52" ry="65" fill="#FFD1DC" stroke="#FF69B4" stroke-width="4"/>
+            <path d="M52 105 L75 92 L95 108 L115 90 L135 106 L148 98" fill="none" stroke="#FF69B4" stroke-width="4" stroke-linecap="round"/>
+            <circle cx="80" cy="135" r="7" fill="#FF9EBB"/>
+            <circle cx="122" cy="80" r="5" fill="#FF9EBB"/>
+            <text x="135" y="55" font-size="22" fill="#9C1B5B">💤</text>
+          </svg>
+        </div>
+        """
+    else:
+        crown = '<polygon points="82,42 90,25 100,38 110,25 118,42" fill="#FFD700" stroke="#E6AC00" stroke-width="2"/>' if love >= 15 else ''
+        hearts = '<text x="142" y="55" font-size="20">💖</text><text x="38" y="65" font-size="18">✨</text>' if love >= 5 else ''
+        dragon_svg = f"""
+        <style>
+        @keyframes dragonBounce {{
+            0%, 100% {{ transform: translateY(0px); }}
+            50% {{ transform: translateY(-7px); }}
+        }}
+        .baby-dragon {{ animation: dragonBounce 2.2s ease-in-out infinite; }}
+        </style>
+        <div style="text-align:center; margin: 10px 0;">
+          <svg class="baby-dragon" width="165" height="165" viewBox="0 0 200 200">
+            <path d="M55 105 Q20 75 40 120 Q30 135 58 130 Z" fill="#FF9EBB" stroke="#FF69B4" stroke-width="3"/>
+            <path d="M145 105 Q180 75 160 120 Q170 135 142 130 Z" fill="#FF9EBB" stroke="#FF69B4" stroke-width="3"/>
+            <path d="M135 155 Q175 155 170 130 Q165 120 155 130" fill="none" stroke="#FF69B4" stroke-width="8" stroke-linecap="round"/>
+            <ellipse cx="100" cy="135" rx="42" ry="45" fill="#FFB6C1" stroke="#FF69B4" stroke-width="3.5"/>
+            <ellipse cx="100" cy="140" rx="26" ry="30" fill="#FFE4EC"/>
+            <circle cx="100" cy="82" r="38" fill="#FFB6C1" stroke="#FF69B4" stroke-width="3.5"/>
+            <polygon points="75,52 68,32 86,46" fill="#FFF0F5" stroke="#FF69B4" stroke-width="3"/>
+            <polygon points="125,52 132,32 114,46" fill="#FFF0F5" stroke="#FF69B4" stroke-width="3"/>
+            {crown}
+            <path d="M80 80 Q86 72 92 80" fill="none" stroke="#4A2545" stroke-width="3.5" stroke-linecap="round"/>
+            <path d="M108 80 Q114 72 120 80" fill="none" stroke="#4A2545" stroke-width="3.5" stroke-linecap="round"/>
+            <ellipse cx="75" cy="90" rx="7" ry="4" fill="#FF69B4" opacity="0.6"/>
+            <ellipse cx="125" cy="90" rx="7" ry="4" fill="#FF69B4" opacity="0.6"/>
+            <path d="M93 93 Q100 100 107 93" fill="none" stroke="#4A2545" stroke-width="3" stroke-linecap="round"/>
+            {hearts}
+          </svg>
+        </div>
+        """
+    st.markdown(dragon_svg, unsafe_allow_html=True)
+
+    # Determine dragon's current mood
     if love == 0:
         mood = "😴 Sleepy Pink Hatchling (Tap below to wake him up!)"
     elif love < 5:
@@ -296,24 +359,28 @@ with tab_whimsy:
     d_col1, d_col2, d_col3 = st.columns(3)
     with d_col1:
         if st.button("🥚 Pet Dragon", use_container_width=True):
-            st.session_state.dragon_love += 1
-            if st.session_state.dragon_love == 15:
+            new_score = love + 1
+            update_dragon(new_score)
+            if new_score == 15:
                 st.balloons()
             st.toast(random.choice(dragon_reactions))
             st.rerun()
     with d_col2:
         if st.button("🍓 Feed Berry", use_container_width=True):
-            st.session_state.dragon_love += 2
-            if st.session_state.dragon_love >= 15:
+            new_score = love + 2
+            update_dragon(new_score)
+            if new_score >= 15:
                 st.balloons()
             st.toast("Nom nom! He gobbles the sweet dragonberry and does a happy spin! 🍓🐉")
             st.rerun()
     with d_col3:
         if st.button("💎 Shiny Gem", use_container_width=True):
-            st.session_state.dragon_love += 3
-            if st.session_state.dragon_love >= 15:
+            new_score = love + 3
+            update_dragon(new_score)
+            if new_score >= 15:
                 st.balloons()
             st.toast("Ooooh! He adds the pink gem to his treasure hoard and purrs loudly! 💎✨")
             st.rerun()
+
 
 
