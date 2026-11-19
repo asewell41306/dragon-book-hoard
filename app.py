@@ -350,7 +350,7 @@ with tab_whimsy:
     st.divider()
 
     # --- Interactive Baby Dragon Companion ---
-     try:
+    try:
         dragon_df = conn.read(worksheet="DragonStats", ttl=300)
         sheet_love = int(float(dragon_df.at[0, "Love"])) if "Love" in dragon_df.columns and not dragon_df.empty and pd.notna(dragon_df.at[0, "Love"]) else 0
         last_fed = float(dragon_df.at[0, "LastFed"]) if "LastFed" in dragon_df.columns and not dragon_df.empty and pd.notna(dragon_df.at[0, "LastFed"]) else time.time()
