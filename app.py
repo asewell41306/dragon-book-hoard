@@ -247,8 +247,8 @@ with tab_whimsy:
         "💐 Build-your-own bouquet bar at a flower shop + ice cream date!",
         "🌅 Early morning sunrise pastry run in pajamas!",
         "📖 'Silent Reading Date' at a cute café where we read side-by-side holding hands!",
-        "spa Night at home: face masks, comfy robes, and your favorite comfort show! 🧖‍♀️✨",
-        "🎟️ Mystery date night—you pick the vibe (cozy, fancy, or adventurous) and I plan the rest! 🐉"
+        "Spa Night at Home: face masks, comfy robes, and your favorite comfort show! 🧖‍♀️✨",
+        "🎟️ Mystery Date Night—you pick the vibe (cozy, fancy, or adventurous) and I plan the rest! 🐉"
     ]
 
 
@@ -262,7 +262,58 @@ with tab_whimsy:
             st.info(random.choice(date_ideas))
 
     st.divider()
-    if st.button("🥚 Pet the Pink Baby Dragon", use_container_width=True):
-        st.toast("The baby pink dragon purrs happily and blows a tiny heart-shaped smoke ring! 💕🐉")
+    st.subheader("🐉 Your Pink Baby Guardian Dragon")
+
+    # Track dragon affection during her session
+    if "dragon_love" not in st.session_state:
+        st.session_state.dragon_love = 0
+
+    # Determine dragon's current mood based on affection points
+    love = st.session_state.dragon_love
+    if love == 0:
+        mood = "😴 Sleepy Pink Hatchling (Tap below to wake him up!)"
+    elif love < 5:
+        mood = "🌸 Curled Up & Purring Happily"
+    elif love < 10:
+        mood = "✨ Blowing Heart-Shaped Smoke Rings"
+    elif love < 15:
+        mood = "💖 Doing Happy Wing Flaps Around Your Books"
+    else:
+        mood = "👑 Supreme Guardian of the Pink Hoard!"
+
+    st.write(f"**Current Mood:** {mood}")
+    st.progress(min(love / 15, 1.0), text=f"Dragon Affection: {love} 💖")
+
+    dragon_reactions = [
+        "The baby pink dragon chirps softly and curls his tail around your wrist! 💕🐉",
+        "He sneezes a tiny puff of rose-gold glitter onto your book! ✨🌸",
+        "The hatchling rolls over for belly rubs and purrs like a tiny motor! 💖🥚",
+        "He puffs out his chest proudly to guard your favorite books! 📚🐉",
+        "A tiny heart-shaped smoke ring floats up from his nose! 💕💨",
+        "He nuzzles your hand and drops a shiny pink crystal at your feet! 💎🌸"
+    ]
+
+    d_col1, d_col2, d_col3 = st.columns(3)
+    with d_col1:
+        if st.button("🥚 Pet Dragon", use_container_width=True):
+            st.session_state.dragon_love += 1
+            if st.session_state.dragon_love == 15:
+                st.balloons()
+            st.toast(random.choice(dragon_reactions))
+            st.rerun()
+    with d_col2:
+        if st.button("🍓 Feed Berry", use_container_width=True):
+            st.session_state.dragon_love += 2
+            if st.session_state.dragon_love >= 15:
+                st.balloons()
+            st.toast("Nom nom! He gobbles the sweet dragonberry and does a happy spin! 🍓🐉")
+            st.rerun()
+    with d_col3:
+        if st.button("💎 Shiny Gem", use_container_width=True):
+            st.session_state.dragon_love += 3
+            if st.session_state.dragon_love >= 15:
+                st.balloons()
+            st.toast("Ooooh! He adds the pink gem to his treasure hoard and purrs loudly! 💎✨")
+            st.rerun()
 
 
