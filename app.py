@@ -446,3 +446,63 @@ with tab_whimsy:
     elif love < 15:
         mood = f"💖 {dragon_name} is doing happy wing flaps around your shelves"
     else:
+        mood = f" 👑 {dragon_name} is the Supreme Guardian of the Book Hoard!"
+
+    st.write(f"**Current Mood:** {mood}")
+    st.progress(min(love / 15, 1.0), text=f"Dragon Affection: {love} 💖")
+    
+    dragon_reactions = [
+        f"{dragon_name} chirps softly and curls his tail around your wrist! 💕🐉",
+        f"{dragon_name} sneezes a tiny puff of rose-gold glitter onto your book! ✨🌸",
+        f"{dragon_name} rolls over for belly rubs and purrs like a tiny motor! 💖🥚",
+        f"{dragon_name} puffs out his chest proudly to guard your favorite books! 📚🐉",
+        f"A tiny heart-shaped smoke ring floats up from {dragon_name}'s nose! 💕💨"
+    ]
+    
+    if "dragon_msg" not in st.session_state:
+        st.session_state.dragon_msg = ""
+        
+    d_col1, d_col2, d_col3 = st.columns(3)
+     with d_col1:
+         if st.button("🥚 Pet Dragon", use_container_width=True):
+             new_score = love + 1 update_dragon(new_score)
+             st.session_state.dragon_msg = random.choice(dragon_reactions)
+             if new_score == 15:
+                 st.balloons()
+            st.rerun(
+    with d_col2:
+        if st.button("🍓 Feed Berry", use_container_width=True):
+            new_score = love + 2
+            update_dragon(new_score)
+            st.session_state.dragon_msg = f"Nom nom! {dragon_name} gobbles the sweet berry and does a happy spin! 🍓🐉"
+            if new_score >= 15:
+                st.balloons()
+            st.rerun()
+    with d_col3:
+        if st.button("💎 Shiny Gem", use_container_width=True):
+            new_score = love + 3
+            update_dragon(new_score)
+            st.session_state.dragon_msg = f"Ooooh! {dragon_name} adds the pink gem to his treasure hoard! 💎✨"
+            if new_score >= 15:
+                st.balloons()
+            st.rerun()
+            
+    if st.session_state.dragon_msg:
+        st.info(st.session_state.dragon_msg)
+
+# --- Dragon Name & Accessory Closet ---
+auto_open_naming = (love > 0 and dragon_name == "Baby Dragon")
+with st.expander(f"🎀 Customize {dragon_name} (Name & Accessories)", expanded=auto_open_naming):
+    new_dragon_name = st.text_input("Give your dragon a name:", value="" if dragon_name == "Baby Dragon" else dragon_name, placeholder="Type a name...")
+    acc_options = ["None", "🌸 Flower Crown", "👓 Reading Glasses", "👑 Royal Crown"]
+    current_acc_idx = acc_options.index(accessory) if accessory in acc_options else 0
+    chosen_acc = st.selectbox("Equip Accessory (Unlocks at 3+ Affection)", acc_options, index=current_acc_idx)
+
+    if st.button("Save Dragon Look ✨", use_container_width=True):
+        if chosen_acc != "None" and love < 3:
+            st.warning("Pet or feed your dragon to reach 3+ Affection first to unlock accessories! 🥚")
+        else:
+            update_dragon(love, new_name=new_dragon_name.strip() or "Baby Dragon", new_acc=chosen_acc)
+            st.success(f"Updated {new_dragon_name.strip() or 'Baby Dragon'}!")
+            st.rerun()
+
