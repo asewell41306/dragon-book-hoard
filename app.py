@@ -340,6 +340,7 @@ with tab_whimsy:
           </svg>
         </div>
         """
+    dragon_svg = "\n".join(line.strip() for line in dragon_svg.splitlines())
     st.markdown(dragon_svg, unsafe_allow_html=True)
 
     # Determine dragon's current mood
