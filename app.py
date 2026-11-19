@@ -70,6 +70,19 @@ st.markdown("""
 <div class="petal" style="left: 65%; animation-duration: 15s; animation-delay: 4s;">🌷</div>
 <div class="petal" style="left: 82%; animation-duration: 10s; animation-delay: 2s;">✨</div>
 <div class="petal" style="left: 93%; animation-duration: 13s; animation-delay: 5s;">🌸</div>
+<svg style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 0; opacity: 0.38;" viewBox="0 0 1000 1000" preserveAspectRatio="none">
+  <!-- Right-side Willow Trunk & Main Branches -->
+  <path d="M985 1000 Q960 650 990 220 Q920 110 760 40 M975 340 Q880 180 680 90 M982 260 Q940 80 830 0" fill="none" stroke="#8D6E63" stroke-width="18" stroke-linecap="round"/>
+  <!-- Left-side Upper Branch -->
+  <path d="M0 140 Q120 80 260 20 M0 70 Q90 30 180 0" fill="none" stroke="#8D6E63" stroke-width="14" stroke-linecap="round"/>
+  <!-- Soft Canopy Glow -->
+  <ellipse cx="880" cy="70" rx="240" ry="110" fill="#F48FB1" opacity="0.55"/>
+  <ellipse cx="120" cy="40" rx="180" ry="85" fill="#F48FB1" opacity="0.45"/>
+  <!-- Hanging Weeping Willow Vines (Right & Center) -->
+  <path d="M710 75 Q690 260 705 460 M750 45 Q730 280 745 520 M790 35 Q775 310 788 580 M830 25 Q815 330 828 610 M870 20 Q855 300 868 560 M910 30 Q895 280 908 530 M950 60 Q935 290 948 510" fill="none" stroke="#EC407A" stroke-width="5" stroke-linecap="round"/>
+  <!-- Hanging Weeping Willow Vines (Left Corner) -->
+  <path d="M45 95 Q35 250 48 420 M85 75 Q75 270 88 470 M130 55 Q120 240 132 410 M175 35 Q165 210 176 360 M220 25 Q212 180 222 310" fill="none" stroke="#EC407A" stroke-width="5" stroke-linecap="round"/>
+</svg>
 """, unsafe_allow_html=True)
 
 # Central Time Greeting
