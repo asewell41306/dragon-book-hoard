@@ -214,7 +214,8 @@ show_shelf("Books I've Read", tab3)
 with tab_whimsy:
     st.subheader("🌸 A Secret Note from Your Guardian Dragon 🐉")
     st.write("Tap a button below whenever you open the willow tree fairy door!")
-     love_notes = [
+    
+    love_notes = [
         "You are my favorite treasure in every realm. 💖",
         "Even a fierce dragon couldn't guard something as precious as you. 🐉🌸",
         "Just a reminder that you make my whole world brighter every single day. ✨",
