@@ -350,26 +350,29 @@ with tab_whimsy:
     st.divider()
 
     # --- Interactive Baby Dragon Companion ---
-    try:
+     try:
         dragon_df = conn.read(worksheet="DragonStats", ttl=300)
-        saved_love = int(float(dragon_df.at[0, "Love"])) if "Love" in dragon_df.columns and not dragon_df.empty and pd.notna(dragon_df.at[0, "Love"]) else 0
+        sheet_love = int(float(dragon_df.at[0, "Love"])) if "Love" in dragon_df.columns and not dragon_df.empty and pd.notna(dragon_df.at[0, "Love"]) else 0
         last_fed = float(dragon_df.at[0, "LastFed"]) if "LastFed" in dragon_df.columns and not dragon_df.empty and pd.notna(dragon_df.at[0, "LastFed"]) else time.time()
-        dragon_name = str(dragon_df.at[0, "Name"]) if "Name" in dragon_df.columns and not dragon_df.empty and pd.notna(dragon_df.at[0, "Name"]) else "Baby Dragon"
-        accessory = str(dragon_df.at[0, "Accessory"]) if "Accessory" in dragon_df.columns and not dragon_df.empty and pd.notna(dragon_df.at[0, "Accessory"]) else "None"
-        dragon_color = str(dragon_df.at[0, "Color"]) if "Color" in dragon_df.columns and not dragon_df.empty and pd.notna(dragon_df.at[0, "Color"]) else "🌸 Sakura Pink"
+        sheet_name = str(dragon_df.at[0, "Name"]) if "Name" in dragon_df.columns and not dragon_df.empty and pd.notna(dragon_df.at[0, "Name"]) else "Baby Dragon"
+        sheet_acc = str(dragon_df.at[0, "Accessory"]) if "Accessory" in dragon_df.columns and not dragon_df.empty and pd.notna(dragon_df.at[0, "Accessory"]) else "None"
+        sheet_col = str(dragon_df.at[0, "Color"]) if "Color" in dragon_df.columns and not dragon_df.empty and pd.notna(dragon_df.at[0, "Color"]) else "🌸 Sakura Pink"
     except Exception:
-        saved_love = 0
+        sheet_love = 0
         last_fed = time.time()
-        dragon_name = "Baby Dragon"
-        accessory = "None"
-        dragon_color = "🌸 Sakura Pink"
+        sheet_name = "Baby Dragon"
+        sheet_acc = "None"
+        sheet_col = "🌸 Sakura Pink"
 
-    if last_fed > 0:
+    if last_fed > 0 and "cached_love" not in st.session_state:
         hours_away = (time.time() - last_fed) / 3600
         decay = int(hours_away // 12)
-        love = max(0, saved_love - decay)
-    else:
-        love = saved_love
+        sheet_love = max(0, sheet_love - decay)
+
+    love = st.session_state.get("cached_love", sheet_love)
+    dragon_name = st.session_state.get("cached_name", sheet_name)
+    accessory = st.session_state.get("cached_acc", sheet_acc)
+    dragon_color = st.session_state.get("cached_col", sheet_col)
 
     def update_dragon(new_love, new_name=dragon_name, new_acc=accessory, new_col=dragon_color):
         st.session_state.cached_love = new_love
