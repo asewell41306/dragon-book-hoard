@@ -168,7 +168,7 @@ if door == "willow":
 # Connect to Google Sheets
 conn = st.connection("gsheets", type=GSheetsConnection)
 COLUMNS = ["Title", "Author", "Shelf", "Rating", "Notes", "CoverURL"]
-SHELVES = ["Books I Own", "Books I Want to Read", "Books I've Read"]
+SHELVES = ["Currently Reading", "Books I Own", "Books I Want to Read", "Books I've Read"]
 
 df = conn.read(worksheet="Sheet1", ttl=300)
 if df.empty or list(df.columns) != COLUMNS:
@@ -271,6 +271,35 @@ with st.expander("🎯 Set My Reading Goal", expanded=False):
         st.success(f"Reading goal updated to {int(new_goal)} books!")
         st.rerun()
 
+# --- Currently Reading Spotlight Card ---
+curr_books = df[df["Shelf"].fillna("").astype(str).str.contains("Currently Reading", regex=False)]
+if not curr_books.empty:
+    with st.container():
+        st.markdown("### 📖 Currently Reading")
+        for c_idx, c_row in curr_books.iterrows():
+            c_col1, c_col2 = st.columns(2)
+            c_cover = str(c_row.get("CoverURL", "")).strip()
+            with c_col1:
+                if c_cover.startswith("http"):
+                    st.image(c_cover, width=95)
+                else:
+                    st.markdown("## 📖")
+            with c_col2:
+                st.write(f"**{c_row['Title']}** by *{c_row['Author']}*")
+                if st.button("✅ Finished Book! (+5 XP)", key=f"fin_{c_idx}", use_container_width=True):
+                    existing = [s.strip() for s in str(c_row["Shelf"]).split(",") if s.strip() and s.strip() != "Currently Reading"]
+                    if "Books I've Read" not in existing:
+                        existing.append("Books I've Read")
+                    df.at[c_idx, "Shelf"] = ", ".join(existing)
+                    save_books(df)
+                    save_dragon_stats(new_love=love + 5)
+                    st.balloons()
+                    st.success(f"Congrats on finishing '{c_row['Title']}'! +5 XP to {dragon_name}! 🐉✨")
+                    st.rerun()
+        st.divider()
+
+
+
 # Put Dragon's Whimsy first if she tapped the Willow Stand!
 if door == "willow":
     tab_whimsy, tab1, tab2, tab3 = st.tabs([
@@ -334,10 +363,38 @@ def show_shelf(shelf_name, tab):
         shelf_books = df[df["Shelf"].fillna("").astype(str).str.contains(shelf_name, regex=False)]
 
         if shelf_name == "Books I Want to Read" and not shelf_books.empty:
+            if "picked_tbr_idx" not in st.session_state:
+                st.session_state.picked_tbr_idx = None
+
             if st.button("🎲 Can't decide? Let the dragon pick my next read!", use_container_width=True):
-                pick = shelf_books.sample(1).iloc
+                rand_idx, _ = next(shelf_books.sample(1).iterrows())
+                st.session_state.picked_tbr_idx = rand_idx
                 st.balloons()
-                st.success(f"🐉 {dragon_name} picked: **{pick['Title']}** by *{pick['Author']}*!")
+
+            if st.session_state.picked_tbr_idx in shelf_books.index:
+                p_idx = st.session_state.picked_tbr_idx
+                pick = shelf_books.loc[p_idx]
+                with st.container():
+                    st.markdown(f"#### 🐉 {dragon_name} recommends:")
+                    p_col1, p_col2 = st.columns(2)
+                    p_cover = str(pick.get("CoverURL", "")).strip()
+                    with p_col1:
+                        if p_cover.startswith("http"):
+                            st.image(p_cover, width=105)
+                        else:
+                            st.markdown("## 📖")
+                    with p_col2:
+                        st.write(f"**{pick['Title']}**")
+                        st.write(f"*{pick['Author']}*")
+                        if st.button("📖 Start Reading Now!", key=f"start_tbr_{p_idx}", use_container_width=True):
+                            existing = [s.strip() for s in str(pick["Shelf"]).split(",") if s.strip() and s.strip() != "Books I Want to Read"]
+                            if "Currently Reading" not in existing:
+                                existing.append("Currently Reading")
+                            df.at[p_idx, "Shelf"] = ", ".join(existing)
+                            save_books(df)
+                            st.session_state.picked_tbr_idx = None
+                            st.rerun()
+                st.divider()
 
         if search_query:
             q = search_query.lower()
