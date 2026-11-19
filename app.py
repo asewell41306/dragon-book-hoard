@@ -44,7 +44,17 @@ st.markdown("""
 [data-testid="stAlert"] p {
     color: #E75480 !important;
 }
-    
+
+[data-testid="stToast"] {
+    background-color: #FFF0F5 !important;
+    border: 1.5px solid #FF69B4 !important;
+    border-radius: 16px !important;
+    box-shadow: 0 4px 15px rgba(255, 105, 180, 0.25) !important;
+}
+
+[data-testid="stToast"] * {
+    color: #9C1B5B !important;
+}    
 @keyframes floatDown {
     0% { transform: translateY(-10vh) rotate(0deg); opacity: 0; }
     15% { opacity: 0.85; }
