@@ -592,8 +592,7 @@ with tab_whimsy:
         </div>
         """
 
-    dragon_svg = "\n".join(line.strip() for line in dragon_svg.splitlines())
-    st.markdown(dragon_svg, unsafe_allow_html=True)
+    st.components.v1.html(dragon_svg, height=225)
 
     # Mood status reflecting loneliness or happiness
     if loneliness == "egg":
