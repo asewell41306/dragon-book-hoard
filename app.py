@@ -356,11 +356,13 @@ with tab_whimsy:
         last_fed = float(dragon_df.at[0, "LastFed"]) if "LastFed" in dragon_df.columns and not dragon_df.empty and pd.notna(dragon_df.at[0, "LastFed"]) else time.time()
         dragon_name = str(dragon_df.at[0, "Name"]) if "Name" in dragon_df.columns and not dragon_df.empty and pd.notna(dragon_df.at[0, "Name"]) else "Baby Dragon"
         accessory = str(dragon_df.at[0, "Accessory"]) if "Accessory" in dragon_df.columns and not dragon_df.empty and pd.notna(dragon_df.at[0, "Accessory"]) else "None"
+        dragon_color = str(dragon_df.at[0, "Color"]) if "Color" in dragon_df.columns and not dragon_df.empty and pd.notna(dragon_df.at[0, "Color"]) else "🌸 Sakura Pink"
     except Exception:
         saved_love = 0
         last_fed = time.time()
         dragon_name = "Baby Dragon"
         accessory = "None"
+        dragon_color = "🌸 Sakura Pink"
 
     if last_fed > 0:
         hours_away = (time.time() - last_fed) / 3600
@@ -369,67 +371,132 @@ with tab_whimsy:
     else:
         love = saved_love
 
-    def update_dragon(new_love, new_name=dragon_name, new_acc=accessory):
+    def update_dragon(new_love, new_name=dragon_name, new_acc=accessory, new_col=dragon_color):
         new_df = pd.DataFrame([{
             "Love": new_love,
             "LastFed": time.time(),
             "Name": new_name,
             "Accessory": new_acc,
-            "Goal": reading_goal
+            "Goal": reading_goal,
+            "Color": new_col
         }])
         conn.update(worksheet="DragonStats", data=new_df)
         st.cache_data.clear()
 
-    st.subheader(f"🐉 {dragon_name} — Your Guardian Dragon")
+    if "dragon_msg" not in st.session_state:
+        st.session_state.dragon_msg = ""
+    if "dragon_action" not in st.session_state:
+        st.session_state.dragon_action = ""
 
-    # --- Cute Animated Pink Baby Dragon SVG with Accessories ---
+    # Determine growth stage
     if love == 0:
-        dragon_svg = """
+        stage_label = "🥚 Sleeping Egg"
+    elif love < 6:
+        stage_label = "🐣 Tiny Hatchling"
+    elif love < 15:
+        stage_label = "✨ Playful Juvenile"
+    else:
+        stage_label = "👑 Majestic Guardian Dragon"
+
+    st.subheader(f"🐉 {dragon_name} — {stage_label}")
+
+    # Color palette dictionary (body, wing, belly, outline)
+    palettes = {
+        "🌸 Sakura Pink": ("#FFB6C1", "#FF9EBB", "#FFE4EC", "#FF69B4"),
+        "💜 Lavender Mist": ("#D8BFD8", "#C39BD3", "#F5EEF8", "#8E44AD"),
+        "🩵 Mint Fairy": ("#A3E4D7", "#76D7C4", "#E8F8F5", "#1ABC9C"),
+        "🍑 Peach Blossom": ("#FAD7A0", "#F8C471", "#FEF5E7", "#E67E22"),
+        "🤍 Pearl White": ("#F8F9F9", "#E5E7E9", "#FFFFFF", "#D98880")
+    }
+    body_c, wing_c, belly_c, line_c = palettes.get(dragon_color, palettes["🌸 Sakura Pink"])
+
+    # Action overlay graphic (Pet, Berry, or Gem)
+    action_svg = ""
+    if st.session_state.dragon_action == "pet":
+        action_svg = '<text x="35" y="65" font-size="24">💕</text><text x="155" y="60" font-size="22">💖</text><text x="145" y="105" font-size="18">✨</text>'
+    elif st.session_state.dragon_action == "berry":
+        action_svg = '<text x="32" y="135" font-size="26">🍓</text><text x="152" y="75" font-size="20">😋</text><text x="155" y="135" font-size="22">🍓</text>'
+    elif st.session_state.dragon_action == "gem":
+        action_svg = '<text x="30" y="135" font-size="26">💎</text><text x="152" y="65" font-size="22">✨</text><text x="152" y="135" font-size="26">💎</text>'
+
+    # Scenic Sanctuary Background (Moon, Stars, Hills & Little Book Stack)
+    bg_svg = """
+    <defs>
+      <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#FCE4EC"/>
+        <stop offset="100%" stop-color="#E1BEE7"/>
+      </linearGradient>
+    </defs>
+    <rect x="0" y="0" width="220" height="200" rx="22" fill="url(#skyGrad)" stroke="#FF69B4" stroke-width="3"/>
+    <circle cx="180" cy="36" r="14" fill="#FFF9C4" opacity="0.9"/>
+    <circle cx="185" cy="33" r="12" fill="#FCE4EC"/>
+    <text x="25" y="35" font-size="12" opacity="0.8">✨</text>
+    <text x="135" y="28" font-size="11" opacity="0.8">✨</text>
+    <path d="M0 165 Q65 142 120 162 Q175 145 220 160 L220 200 L0 200 Z" fill="#F8BBD0" opacity="0.7"/>
+    <path d="M0 175 Q90 158 220 175 L220 200 L0 200 Z" fill="#F48FB1" opacity="0.55"/>
+    <rect x="18" y="168" width="34" height="8" rx="2" fill="#CE93D8" stroke="#8E24AA" stroke-width="1.5"/>
+    <rect x="21" y="160" width="30" height="8" rx="2" fill="#F48FB1" stroke="#C2185B" stroke-width="1.5"/>
+    """
+
+    if love == 0:
+        dragon_svg = f"""
         <div style="text-align:center; margin: 10px 0;">
-          <svg width="150" height="150" viewBox="0 0 200 200">
-            <ellipse cx="100" cy="115" rx="52" ry="65" fill="#FFD1DC" stroke="#FF69B4" stroke-width="4"/>
-            <path d="M52 105 L75 92 L95 108 L115 90 L135 106 L148 98" fill="none" stroke="#FF69B4" stroke-width="4" stroke-linecap="round"/>
-            <circle cx="80" cy="135" r="7" fill="#FF9EBB"/>
-            <circle cx="122" cy="80" r="5" fill="#FF9EBB"/>
-            <text x="135" y="55" font-size="22" fill="#9C1B5B">💤</text>
+          <svg width="220" height="200" viewBox="0 0 220 200">
+            {bg_svg}
+            <ellipse cx="110" cy="118" rx="46" ry="58" fill="{belly_c}" stroke="{line_c}" stroke-width="4"/>
+            <path d="M68 110 L88 98 L108 112 L128 96 L152 108" fill="none" stroke="{line_c}" stroke-width="4" stroke-linecap="round"/>
+            <circle cx="92" cy="138" r="6" fill="{wing_c}"/>
+            <circle cx="130" cy="86" r="5" fill="{wing_c}"/>
+            <text x="145" y="62" font-size="22">💤</text>
           </svg>
         </div>
         """
     else:
+        if love < 6:
+            scale = "0.86"
+            wings = f'<path d="M68 108 Q42 88 55 120 Q48 130 70 126 Z" fill="{wing_c}" stroke="{line_c}" stroke-width="3"/><path d="M152 108 Q178 88 165 120 Q172 130 150 126 Z" fill="{wing_c}" stroke="{line_c}" stroke-width="3"/>'
+        elif love < 15:
+            scale = "0.96"
+            wings = f'<path d="M66 105 Q24 68 44 122 Q34 138 68 132 Z" fill="{wing_c}" stroke="{line_c}" stroke-width="3"/><path d="M154 105 Q196 68 176 122 Q186 138 152 132 Z" fill="{wing_c}" stroke="{line_c}" stroke-width="3"/>'
+        else:
+            scale = "1.04"
+            wings = f'<path d="M65 102 Q12 52 36 124 Q24 144 68 134 Z" fill="{wing_c}" stroke="{line_c}" stroke-width="3.5"/><path d="M155 102 Q208 52 184 124 Q196 144 152 134 Z" fill="{wing_c}" stroke="{line_c}" stroke-width="3.5"/>'
+
         acc_svg = ""
         if accessory == "👑 Royal Crown" or (accessory == "None" and love >= 15):
-            acc_svg = '<polygon points="82,42 90,25 100,38 110,25 118,42" fill="#FFD700" stroke="#E6AC00" stroke-width="2"/>'
+            acc_svg = '<polygon points="92,42 100,25 110,38 120,25 128,42" fill="#FFD700" stroke="#E6AC00" stroke-width="2"/>'
         elif accessory == "🌸 Flower Crown":
-            acc_svg = '<circle cx="82" cy="44" r="7" fill="#FF69B4"/><circle cx="100" cy="41" r="8" fill="#FFB6C1"/><circle cx="118" cy="44" r="7" fill="#FF69B4"/><circle cx="100" cy="41" r="3" fill="#FFD700"/>'
+            acc_svg = '<circle cx="92" cy="44" r="7" fill="#FF69B4"/><circle cx="110" cy="41" r="8" fill="#FFB6C1"/><circle cx="128" cy="44" r="7" fill="#FF69B4"/><circle cx="110" cy="41" r="3" fill="#FFD700"/>'
         elif accessory == "👓 Reading Glasses":
-            acc_svg = '<circle cx="86" cy="78" r="10" fill="none" stroke="#4A2545" stroke-width="2.5"/><circle cx="114" cy="78" r="10" fill="none" stroke="#4A2545" stroke-width="2.5"/><line x1="96" y1="78" x2="104" y2="78" stroke="#4A2545" stroke-width="2.5"/>'
+            acc_svg = '<circle cx="96" cy="78" r="10" fill="none" stroke="#4A2545" stroke-width="2.5"/><circle cx="124" cy="78" r="10" fill="none" stroke="#4A2545" stroke-width="2.5"/><line x1="106" y1="78" x2="114" y2="78" stroke="#4A2545" stroke-width="2.5"/>'
 
-        hearts = '<text x="142" y="55" font-size="20">💖</text><text x="38" y="65" font-size="18">✨</text>' if love >= 5 else ''
         dragon_svg = f"""
         <style>
         @keyframes dragonBounce {{
-            0%, 100% {{ transform: translateY(0px); }}
-            50% {{ transform: translateY(-7px); }}
+            0%, 100% {{ transform: translateY(0px) scale({scale}); }}
+            50% {{ transform: translateY(-6px) scale({scale}); }}
         }}
-        .baby-dragon {{ animation: dragonBounce 2.2s ease-in-out infinite; }}
+        .baby-dragon {{ transform-origin: 110px 130px; animation: dragonBounce 2.2s ease-in-out infinite; }}
         </style>
         <div style="text-align:center; margin: 10px 0;">
-          <svg class="baby-dragon" width="165" height="165" viewBox="0 0 200 200">
-            <path d="M55 105 Q20 75 40 120 Q30 135 58 130 Z" fill="#FF9EBB" stroke="#FF69B4" stroke-width="3"/>
-            <path d="M145 105 Q180 75 160 120 Q170 135 142 130 Z" fill="#FF9EBB" stroke="#FF69B4" stroke-width="3"/>
-            <path d="M135 155 Q175 155 170 130 Q165 120 155 130" fill="none" stroke="#FF69B4" stroke-width="8" stroke-linecap="round"/>
-            <ellipse cx="100" cy="135" rx="42" ry="45" fill="#FFB6C1" stroke="#FF69B4" stroke-width="3.5"/>
-            <ellipse cx="100" cy="140" rx="26" ry="30" fill="#FFE4EC"/>
-            <circle cx="100" cy="82" r="38" fill="#FFB6C1" stroke="#FF69B4" stroke-width="3.5"/>
-            <polygon points="75,52 68,32 86,46" fill="#FFF0F5" stroke="#FF69B4" stroke-width="3"/>
-            <polygon points="125,52 132,32 114,46" fill="#FFF0F5" stroke="#FF69B4" stroke-width="3"/>
-            {acc_svg}
-            <path d="M80 80 Q86 72 92 80" fill="none" stroke="#4A2545" stroke-width="3.5" stroke-linecap="round"/>
-            <path d="M108 80 Q114 72 120 80" fill="none" stroke="#4A2545" stroke-width="3.5" stroke-linecap="round"/>
-            <ellipse cx="75" cy="90" rx="7" ry="4" fill="#FF69B4" opacity="0.6"/>
-            <ellipse cx="125" cy="90" rx="7" ry="4" fill="#FF69B4" opacity="0.6"/>
-            <path d="M93 93 Q100 100 107 93" fill="none" stroke="#4A2545" stroke-width="3" stroke-linecap="round"/>
-            {hearts}
+          <svg width="220" height="200" viewBox="0 0 220 200">
+            {bg_svg}
+            <g class="baby-dragon">
+              {wings}
+              <path d="M145 155 Q185 155 180 130 Q175 120 165 130" fill="none" stroke="{line_c}" stroke-width="8" stroke-linecap="round"/>
+              <ellipse cx="110" cy="135" rx="42" ry="45" fill="{body_c}" stroke="{line_c}" stroke-width="3.5"/>
+              <ellipse cx="110" cy="140" rx="26" ry="30" fill="{belly_c}"/>
+              <circle cx="110" cy="82" r="38" fill="{body_c}" stroke="{line_c}" stroke-width="3.5"/>
+              <polygon points="85,52 78,32 96,46" fill="{belly_c}" stroke="{line_c}" stroke-width="3"/>
+              <polygon points="135,52 142,32 124,46" fill="{belly_c}" stroke="{line_c}" stroke-width="3"/>
+              {acc_svg}
+              <path d="M90 80 Q96 72 102 80" fill="none" stroke="#4A2545" stroke-width="3.5" stroke-linecap="round"/>
+              <path d="M118 80 Q124 72 130 80" fill="none" stroke="#4A2545" stroke-width="3.5" stroke-linecap="round"/>
+              <ellipse cx="85" cy="90" rx="7" ry="4" fill="#FF69B4" opacity="0.6"/>
+              <ellipse cx="135" cy="90" rx="7" ry="4" fill="#FF69B4" opacity="0.6"/>
+              <path d="M103 93 Q110 100 117 93" fill="none" stroke="#4A2545" stroke-width="3" stroke-linecap="round"/>
+            </g>
+            {action_svg}
           </svg>
         </div>
         """
@@ -438,30 +505,23 @@ with tab_whimsy:
     st.markdown(dragon_svg, unsafe_allow_html=True)
 
     if love == 0:
-        mood = f"😴 {dragon_name} is fast asleep in his egg (Tap below to wake him up!)"
-    elif love < 5:
-        mood = f"🌸 {dragon_name} is curled up and purring happily"
-    elif love < 10:
-        mood = f"✨ {dragon_name} is blowing tiny heart-shaped smoke rings"
+        mood = f"😴 {dragon_name} is fast asleep in her egg (Tap below to hatch her!)"
+    elif love < 6:
+        mood = f"🐣 {dragon_name} is a tiny hatchling waddling around your books"
     elif love < 15:
-        mood = f"💖 {dragon_name} is doing happy wing flaps around your shelves"
+        mood = f"✨ {dragon_name} is growing bigger wings and blowing heart-shaped smoke rings"
     else:
-        mood = f"👑 {dragon_name} is the Supreme Guardian of the Book Hoard!"
+        mood = f"👑 {dragon_name} is a full-grown Majestic Guardian watching over your hoard!"
 
     st.write(f"**Current Mood:** {mood}")
-
     st.progress(min(love / 15, 1.0), text=f"Dragon Affection: {love} 💖")
 
     dragon_reactions = [
-        f"{dragon_name} chirps softly and curls his tail around your wrist! 💕🐉",
+        f"{dragon_name} chirps softly and curls her tail around your wrist! 💕🐉",
         f"{dragon_name} sneezes a tiny puff of rose-gold glitter onto your book! ✨🌸",
         f"{dragon_name} rolls over for belly rubs and purrs like a tiny motor! 💖🥚",
-        f"{dragon_name} puffs out his chest proudly to guard your favorite books! 📚🐉",
-        f"A tiny heart-shaped smoke ring floats up from {dragon_name}'s nose! 💕💨"
+        f"{dragon_name} puffs out her chest proudly to guard your favorite books! 📚🐉"
     ]
-
-    if "dragon_msg" not in st.session_state:
-        st.session_state.dragon_msg = ""
 
     d_col1, d_col2, d_col3 = st.columns(3)
     with d_col1:
@@ -469,7 +529,8 @@ with tab_whimsy:
             new_score = love + 1
             update_dragon(new_score)
             st.session_state.dragon_msg = random.choice(dragon_reactions)
-            if new_score == 15:
+            st.session_state.dragon_action = "pet"
+            if new_score in (6, 15):
                 st.balloons()
             st.rerun()
     with d_col2:
@@ -477,25 +538,32 @@ with tab_whimsy:
             new_score = love + 2
             update_dragon(new_score)
             st.session_state.dragon_msg = f"Nom nom! {dragon_name} gobbles the sweet berry and does a happy spin! 🍓🐉"
-            if new_score >= 15:
+            st.session_state.dragon_action = "berry"
+            if (new_score >= 6 and love < 6) or (new_score >= 15 and love < 15):
                 st.balloons()
             st.rerun()
     with d_col3:
         if st.button("💎 Shiny Gem", use_container_width=True):
             new_score = love + 3
             update_dragon(new_score)
-            st.session_state.dragon_msg = f"Ooooh! {dragon_name} adds the pink gem to his treasure hoard! 💎✨"
-            if new_score >= 15:
+            st.session_state.dragon_msg = f"Ooooh! {dragon_name} adds the sparkling gem to her treasure hoard! 💎✨"
+            st.session_state.dragon_action = "gem"
+            if (new_score >= 6 and love < 6) or (new_score >= 15 and love < 15):
                 st.balloons()
             st.rerun()
 
     if st.session_state.dragon_msg:
         st.info(st.session_state.dragon_msg)
 
-    # --- Dragon Name & Accessory Closet ---
+    # --- Dragon Name, Color & Accessory Closet ---
     auto_open_naming = (love > 0 and dragon_name == "Baby Dragon")
-    with st.expander(f"🎀 Customize {dragon_name} (Name & Accessories)", expanded=auto_open_naming):
+    with st.expander(f"🎀 Customize {dragon_name} (Name, Color & Accessories)", expanded=auto_open_naming):
         new_dragon_name = st.text_input("Give your dragon a name:", value="" if dragon_name == "Baby Dragon" else dragon_name, placeholder="Type a name...")
+
+        color_options = ["🌸 Sakura Pink", "💜 Lavender Mist", "🩵 Mint Fairy", "🍑 Peach Blossom", "🤍 Pearl White"]
+        current_col_idx = color_options.index(dragon_color) if dragon_color in color_options else 0
+        chosen_color = st.selectbox("Scale Color:", color_options, index=current_col_idx)
+
         acc_options = ["None", "🌸 Flower Crown", "👓 Reading Glasses", "👑 Royal Crown"]
         current_acc_idx = acc_options.index(accessory) if accessory in acc_options else 0
         chosen_acc = st.selectbox("Equip Accessory (Unlocks at 3+ Affection)", acc_options, index=current_acc_idx)
@@ -504,6 +572,12 @@ with tab_whimsy:
             if chosen_acc != "None" and love < 3:
                 st.warning("Pet or feed your dragon to reach 3+ Affection first to unlock accessories! 🥚")
             else:
-                update_dragon(love, new_name=new_dragon_name.strip() or "Baby Dragon", new_acc=chosen_acc)
+                st.session_state.dragon_action = ""
+                update_dragon(
+                    love,
+                    new_name=new_dragon_name.strip() or "Baby Dragon",
+                    new_acc=chosen_acc,
+                    new_col=chosen_color
+                )
                 st.success(f"Updated {new_dragon_name.strip() or 'Baby Dragon'}!")
                 st.rerun()
