@@ -187,22 +187,24 @@ def show_shelf(shelf_name, tab):
                         st.write(f"*{row['Notes']}*")
 
                     other_shelves = [s for s in SHELVES if s != shelf_name]
-                    btn_col1, btn_col2, btn_col3 = st.columns([2, 2, 1.5])
-                    with btn_col1:
-                        if st.button(f"Move to {other_shelves}", key=f"m1_{idx}"):
-                            df.at[idx, "Shelf"] = other_shelves[0]
-                            save_books(df)
-                            st.rerun()
-                    with btn_col2:
-                        if st.button(f"Move to {other_shelves}", key=f"m2_{idx}"):
-                            df.at[idx, "Shelf"] = other_shelves[1]
-                            save_books(df)
-                            st.rerun()
-                    with btn_col3:
-                        if st.button("🗑️", key=f"del_{idx}", help="Remove Book"):
-                            df = df.drop(idx).reset_index(drop=True)
-                            save_books(df)
-                            st.rerun()
+                    first_shelf = next(iter(other_shelves))
+                    second_shelf = other_shelves[-1]
+
+                    if st.button(f"Move to {first_shelf}", key=f"m1_{idx}", use_container_width=True):
+                        df.at[idx, "Shelf"] = first_shelf
+                        save_books(df)
+                        st.rerun()
+
+                    if st.button(f"Move to {second_shelf}", key=f"m2_{idx}", use_container_width=True):
+                        df.at[idx, "Shelf"] = second_shelf
+                        save_books(df)
+                        st.rerun()
+
+                    if st.button("🗑️ Remove Book", key=f"del_{idx}", use_container_width=True):
+                        df = df.drop(idx).reset_index(drop=True)
+                        save_books(df)
+                        st.rerun()
+
                 st.divider()
 show_shelf("Books I Own", tab1)
 show_shelf("Books I Want to Read", tab2)
@@ -213,21 +215,42 @@ with tab_whimsy:
     st.subheader("🌸 A Secret Note from Your Guardian Dragon 🐉")
     st.write("Tap a button below whenever you open the willow tree fairy door!")
 
-    love_notes = [
+     love_notes = [
         "You are my favorite treasure in every realm. 💖",
         "Even a fierce dragon couldn't guard something as precious as you. 🐉🌸",
         "Just a reminder that you make my whole world brighter every single day. ✨",
         "Here is your fairy blessing for today: extra cozy vibes, good books, and endless smiles! 🌷",
-        "I love you more than dragons love shiny gold. 💕"
+        "I love you more than dragons love shiny gold. 💕",
+        "If our life were a fantasy novel, every single chapter with you would be my favorite. 📖💖",
+        "Consider this your official reminder to drink some water, take a deep breath, and remember how deeply loved you are. 🌸✨",
+        "You are the magic that turned my ordinary world into an enchanted kingdom. 👑🌷",
+        "No matter how busy today gets, you are always my favorite person to come home to. 🐉💕",
+        "If I had a dragon egg for every time you made me smile, my hoard would reach the clouds. 🥚✨",
+        "You deserve every soft, cozy, magical thing this world has to offer today. 🌺💖",
+        "My heart is permanently tethered to yours—no magic spell could ever undo it. ✨🐉",
+        "You are prettier than cherry blossoms in spring and sweeter than fairy nectar. 🌸🍓",
+        "Thank you for being my safe haven, my best friend, and my greatest adventure. 💕🗺️",
+        "Redeem this note anytime for one extra-long hug, a forehead kiss, and your favorite treat! 🎟️💖"
     ]
 
     date_ideas = [
         "📚 Cozy bookstore date + pink drinks afterward!",
-        "🍿 Blanket fort fantasy movie marathon with snacks!",
-        "🌸 Picnic under the trees with pastries and books!",
+        "🍿 Blanket fort fantasy movie marathon with all your favorite snacks!",
+        "🌸 Picnic under the trees with pastries, fruit, and books!",
         "🎨 Paint-and-sip night at home while listening to fantasy soundtracks!",
-        "🍜 Dinner at your favorite spot + stargazing walk!"
+        "🍜 Dinner at your favorite spot + a quiet stargazing walk!",
+        "🕯️ Candlelit indoor picnic on the living room floor with takeout and fairy lights!",
+        "🧁 Bake-off challenge: we make pink cupcakes or cookies from scratch together!",
+        "🚗 Sunset scenic drive with a custom fantasy playlist and iced coffees!",
+        "🛍️ Thrift-store outfit swap: we pick cozy outfits for each other under $20!",
+        "🎲 Board game or cozy co-op video game night with homemade mocktails!",
+        "💐 Build-your-own bouquet bar at a flower shop + ice cream date!",
+        "🌅 Early morning sunrise pastry run in pajamas!",
+        "📖 'Silent Reading Date' at a cute café where we read side-by-side holding hands!",
+        "spa Night at home: face masks, comfy robes, and your favorite comfort show! 🧖‍♀️✨",
+        "🎟️ Mystery date night—you pick the vibe (cozy, fancy, or adventurous) and I plan the rest! 🐉"
     ]
+
 
     col_a, col_b = st.columns(2)
     with col_a:
